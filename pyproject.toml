@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools"] # list of packages needed to build your package
+build-backend = "setuptools.build_meta" # name of the python object that frontends use to perform the build
+
+[project]
+name = "funk"
+version = "0.0.1"
+authors = [
+  { name="numlims", email="numlims@med.uni-greifswald.de"}
+]
+description = "fhir chunk"
+readme = "readme.md"
+requires-python = ">=3.8"
+dependencies = [
+  "fhirbuild @ git+https://github.com/numlims/fhirbuild.git",
+  "figs @ git+https://github.com/numlims/figs.git"
+]
+classifiers = [
+  "Programming Language :: Python :: 3"
+]
+[project.scripts]
+funk = "funk:__main__"
+
+[tool.setuptools]
+packages = ["funk"]

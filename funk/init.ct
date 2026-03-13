@@ -1,0 +1,70 @@
+# init
+
+``//__init__.py:
+``import``
+``chunk``
+``
+
+chunk chunks a fhir resource into multiple files, each holding one
+primary sample and its children. it assumes that the children
+immediately follow their respective primary. it returns a list of files written.
+
+``/chunk:
+def chunk(infile:str, outdir:str, encoding:str="utf-8") -> list:
+    ``.``
+``
+
+read the fhir bundle. 
+
+``
+    f = open(infile, "r", encoding=encoding)
+    jsonin = json.load(f)
+    f.close()
+``
+
+get the entries.
+
+``
+    entries = jsonin["entry"]
+``
+
+go over the entries, collect the aliquots for each primary.
+
+``
+    chunks = []
+    currentchunk = []
+    for entry in entries:
+        resource = figs.resource(entry)
+``
+
+if it's a primary remember the last batch, and open a new batch.
+
+``
+        if figs.category(resource) == "MASTER":
+            if len(currentchunk) > 0:
+                chunks.append(currentchunk)
+            currentchunk = [entry]
+``
+
+if it's not a primary, append to the current batch.
+
+``
+        else:
+            currentchunk.append(entry)
+``
+
+write the batches. use the input file name without .json as outname.
+
+``
+    stem = pathlib.Path(infile).stem
+    return fhirbuild.writeout(chunks, outdir, outname=stem)
+``
+
+import.
+
+``/import:
+import fhirbuild
+from figs import specimen as figs
+import json
+import pathlib
+``

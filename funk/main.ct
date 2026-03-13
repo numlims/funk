@@ -1,0 +1,46 @@
+__main__ is funk's cmd line client.
+
+``//__main__.py:
+``import``
+``main``
+sys.exit(main())
+``
+
+main chunks a fhir bundle into a bunch of fhir bundles, each holding a
+primary sample and its children.
+
+``/main:
+def main():
+    ``.``
+``
+
+parse arguments.
+
+``
+    parser = argparse.ArgumentParser(description="fhir chunk")
+    parser.add_argument("file", help="the file to chunk")
+    parser.add_argument("outdir", help="the output directory")
+    parser.add_argument("-e", help="encoding")
+    args = parser.parse_args()    
+``
+
+funk chunks the fhir.
+
+``
+    out = funk.chunk(args.file, args.outdir, encoding=args.e)
+``
+
+print the out files.
+
+``
+    for o in out:
+        print(o)
+``
+
+import.
+
+``/import:
+import argparse
+import funk
+import sys
+``
