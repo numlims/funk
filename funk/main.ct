@@ -11,23 +11,53 @@ primary sample and its children.
 
 ``/main:
 def main():
-    ``.``
+    ``_``
 ``
 
 parse arguments.
 
-``
+``_:
     parser = argparse.ArgumentParser(description="fhir chunk")
-    parser.add_argument("file", help="the file to chunk")
+    parser.add_argument("input", help="the input file or dir to chunk")
     parser.add_argument("outdir", help="the output directory")
-    parser.add_argument("-e", help="encoding")
+    parser.add_argument("-e", help="input encoding")
     args = parser.parse_args()    
 ``
 
-funk chunks the fhir.
+if file is a directory, take all files from directory.
 
 ``
-    out = funk.chunk(args.file, args.outdir, encoding=args.e)
+    out = []
+    if os.path.isdir(args.input):
+        files = os.listdir(args.input)
+        for file in files:
+            ``.``
+``
+
+only consider json files.
+
+``
+            _, ext = os.path.splitext(file)
+            if ext != ".json":
+                continue
+``
+
+
+put together the directory and filename as path.
+
+chunk them and remember the written files.
+
+``
+            path = os.path.join(args.input, file)
+            written = funk.chunk(path, args.outdir, encoding=args.e)
+            out.extend(written)
+``
+
+for a single file, chunk it, and remember the written files.
+
+``/main/_
+    else:
+        out = funk.chunk(args.input, args.outdir, encoding=args.e)
 ``
 
 print the out files.
@@ -42,5 +72,6 @@ import.
 ``/import:
 import argparse
 import funk
+import os
 import sys
 ``

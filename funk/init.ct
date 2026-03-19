@@ -5,59 +5,92 @@
 ``chunk``
 ``
 
-chunk chunks a fhir resource into multiple files, each holding one
-primary sample and its children. it assumes that the children
-immediately follow their respective primary. it returns a list of files written.
+chunk chunks a fhir resource into multiple files and returns a list of
+files written.
+
+specimen: each written file holds one primary sample and its
+children. it assumes that the children immediately follow their
+respective primary.
+
+observation: it puts max 5 together into one file.
 
 ``/chunk:
 def chunk(infile:str, outdir:str, encoding:str="utf-8") -> list:
-    ``.``
+    ``_``
 ``
 
 read the fhir bundle. 
 
-``
-    f = open(infile, "r", encoding=encoding)
-    jsonin = json.load(f)
-    f.close()
+``_:
+    with f = open(infile, "r", encoding=encoding):
+        jsonin = json.load(f)
 ``
 
 get the entries.
 
 ``
-    entries = jsonin["entry"]
+        entries = jsonin["entry"]
 ``
 
 go over the entries, collect the aliquots for each primary.
 
 ``
-    chunks = []
-    currentchunk = []
-    for entry in entries:
-        resource = figs.resource(entry)
+        chunks = []
+        currentchunk = []
+        obschunks = []
+        currentobs = []
+        for entry in entries:
+            resource = figs.resource(entry)
+            if figs.resource_type(resource) == "Observation":
+                ``observation``
+            elif figs.resource_type(resource) == "Specimen":
+                ``specimen``
 ``
 
-if it's a primary remember the last batch, and open a new batch.
+just collect observations.
 
+``./observation:
+                if len(currentobs) == 5:
+                    obschunks.append(currentobs)
+                    currentobs = []
+                currentobs.append(entry)
 ``
-        if figs.category(resource) == "MASTER":
-            if len(currentchunk) > 0:
-                chunks.append(currentchunk)
-            currentchunk = [entry]
+
+for specimen, if it's a primary remember the last batch, and open a
+new batch.
+
+``../specimen:
+                if figs.category(resource) == "MASTER":
+                    if len(currentchunk) > 0:
+                        chunks.append(currentchunk)
+                    currentchunk = [entry]
 ``
 
 if it's not a primary, append to the current batch.
 
 ``
-        else:
-            currentchunk.append(entry)
+                else:
+                    currentchunk.append(entry)
+``
+
+after the loop, append the last chunks.
+
+``/chunk/_
+        if len(currentchunk) > 0:
+            chunks.append(currentchunk)
+        if len(currentobs) > 0:
+            obschunks.append(currentobs)
 ``
 
 write the batches. use the input file name without .json as outname.
 
+pass the specimen chunks and obs chunks. realistically, there are
+either specimen or obs chunks.
+
 ``
-    stem = pathlib.Path(infile).stem
-    return fhirbuild.writeout(chunks, outdir, outname=stem)
+        stem = pathlib.Path(infile).stem
+        #print(len(obschunks))
+        return fhirbuild.writeout(chunks + obschunks, outdir, outname=stem)
 ``
 
 import.
